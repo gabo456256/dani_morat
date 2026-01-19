@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Morat - Mi Vida Entera (Official Sync)</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; }
+        
+        #bg-slider {
+            position: fixed; width: 100%; height: 100%; z-index: -1;
+            background-size: cover; background-position: center;
+            transition: background-image 1.5s ease; filter: brightness(0.4) blur(2px);
+        }
+
+        .container {
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; height: 100vh; text-align: center;
+        }
+
+        .neon-title {
+            font-size: 100px; color: #fff; text-transform: uppercase;
+            text-shadow: 0 0 10px #bc13fe, 0 0 20px #bc13fe, 0 0 40px #bc13fe, 0 0 80px #bc13fe;
+            margin-bottom: 20px; animation: melt 3s infinite alternate;
+        }
+
+        /* Efecto derretido */
+        @keyframes melt {
+            0% { transform: scale(1); text-shadow: 0 0 20px #bc13fe; }
+            100% { transform: scale(1.05); text-shadow: 0 0 40px #bc13fe, 0 10px 20px #bc13fe; }
+        }
+
+        #lyrics-box {
+            font-size: 32px; color: #0ff; text-shadow: 0 0 15px #0ff;
+            height: 50px; transition: all 0.5s ease; font-italic: italic;
+        }
+
+        .player-ui {
+            margin-top: 40px; width: 300px; height: 5px;
+            background: rgba(255,255,255,0.2); border-radius: 5px; position: relative;
+        }
+
+        #progress-bar {
+            width: 0%; height: 100%; background: #bc13fe;
+            box-shadow: 0 0 10px #bc13fe; transition: width 0.1s linear;
+        }
+
+        iframe { visibility: hidden; position: absolute; }
+    </style>
+</head>
+<body>
+
+    <div id="bg-slider"></div>
+
+    <div class="container">
+        <h1 class="neon-title">MORAT</h1>
+        <div id="lyrics-box">Haz clic para iniciar la experiencia...</div>
+        <div class="player-ui"><div id="progress-bar"></div></div>
+    </div>
+
+    <div id="player"></div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        let player;
+        const lyricsBox = document.getElementById('lyrics-box');
+        const progressBar = document.getElementById('progress-bar');
+        const slider = document.getElementById('bg-slider');
+
+        // Imágenes para el fondo
+        const images = [
+            'https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=2070',
+            'https://images.unsplash.com/photo-1514525253344-48568351dbd9?q=80&w=2070',
+            'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070'
+        ];
+        let imgIndex = 0;
+
+        // Tiempos de la letra (Segundos : Texto)
+        const lyricsMap = [
+            { time: 0, text: "La música será mi vida entera..." },
+            { time: 13, text: "Quiero que sepas que te quiero" },
+            { time: 16, text: "Que no hay nadie más" },
+            { time: 20, text: "Que tú eres mi vida entera..." },
+            { time: 24, text: "Y si me pides que me quede" },
+            { time: 27, text: "Yo me quedaré" },
+            { time: 32, text: "Para la vida entera..." }
+        ];
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '0', width: '0',
+                videoId: '0u6KzU_W050',
+                events: { 'onStateChange': onPlayerStateChange }
+            });
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                setInterval(updateSync, 100);
+                setInterval(changeBackground, 5000);
+            }
+        }
+
+        function updateSync() {
+            const currentTime = player.getCurrentTime();
+            const duration = player.getDuration();
+            
+            // Actualizar barra
+            progressBar.style.width = (currentTime / duration * 100) + "%";
+
+            // Sincronizar letra
+            const currentLyric = lyricsMap.filter(l => currentTime >= l.time).pop();
+            if (currentLyric) lyricsBox.innerText = currentLyric.text;
+        }
+
+        function changeBackground() {
+            slider.style.backgroundImage = `url(${images[imgIndex]})`;
+            imgIndex = (imgIndex + 1) % images.length;
+        }
+
+        window.onclick = () => player.playVideo();
+    </script>
+</body>
+</html>
